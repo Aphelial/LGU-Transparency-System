@@ -1,2 +1,5 @@
 # LGU-Transparency-System
-A web-based system that replaces scattered, static PDF postings of municipal financial records with a searchable public portal.
+A Web-Based Budget, Project, and Program Disclosure System Supporting Open and Accountable Local Governance (SDG 16 & SDG 11)
+
+A web-based system that replaces scattered, static PDF postings of municipal financial records with a searchable public portal. Municipal staff record budget allocations per fiscal year, create project records with a status (Planned, Ongoing, Completed, or Delayed with exact target date of completion), and log itemized project expenses. They also post announcements on programs, events, and disaster relief distributions. Residents can browse all of this without logging in. They can search and filter projects by year, category, or status and view a public dashboard that summarizes total budget versus amount disbursed and project progress at a glance. Built with ReactJS, Laravel, and MySQL, and deployed online. Supports SDG 16 (Peace, Justice and Strong Institutions) by making local government spending transparent and giving residents public access to information, and SDG 11 (Sustainable Cities and Communities) by encouraging participatory, accountable local governance and keeping residents informed about community projects and relief programs. 
+
