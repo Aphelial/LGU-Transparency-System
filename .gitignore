@@ -26,3 +26,4 @@ frontend/src/assets/hero.png
 **/yarn-error.log*
 **/.DS_Store
 Thumbs.db
+.vercel

@@ -67,3 +67,15 @@ Uploaded project images are stored locally under `backend/storage/app/public` an
 
 - Frontend: React, Vite, Tailwind CSS, Recharts
 - Backend: Laravel 12 REST API, Sanctum, SQLite by default
+
+## Deploy with Supabase and Vercel
+
+The frontend runs on Vercel. The Laravel API must run on a PHP host separately; `render.yaml` and `backend/Dockerfile` configure it as a Render web service. The API uses Supabase PostgreSQL, and its startup runs Laravel migrations automatically.
+
+1. In Render, create a **Blueprint** from this GitHub repository and select `render.yaml`.
+2. In Supabase, open **Connect** for this project and copy the PostgreSQL connection string. Use the session pooler connection for the Render `DB_URL` secret; preserve its username, password, host, and port, and ensure the URL includes `sslmode=require`. Do not use the Supabase anon key or service-role key as a database password.
+3. Supply the private Render values when prompted: `DB_URL`, `APP_KEY`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. Generate `APP_KEY` locally from `backend` with `php artisan key:generate --show`; use a unique administrator password of at least 12 characters. Enter secrets only in Render's dashboard, not in Git or chat. The API will create the initial admin account once; later restarts won't reset its password.
+4. After Render finishes deploying, set the Vercel project's production environment variable `VITE_API_URL` to `https://<your-render-service>.onrender.com/api`, then redeploy the Vercel frontend.
+5. Test the API health endpoint at `https://<your-render-service>.onrender.com/up`, then open the Vercel site and sign in at `/admin/login` with the administrator email and password configured in Render.
+
+Do not run `php artisan db:seed` in production: the development seeder uses a known demo password and inserts sample records. The initial admin account is created separately from the private Render environment variables. Render's local container filesystem is ephemeral, so uploaded project media needs durable object storage (for example, Supabase Storage) before relying on uploads in production.
