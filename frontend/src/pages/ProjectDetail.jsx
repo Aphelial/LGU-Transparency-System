@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { CalendarClock, ImageIcon } from "lucide-react";
+import { CalendarClock, ImageIcon, X, ZoomIn } from "lucide-react";
 import {
   BackLink,
   Card,
@@ -27,6 +28,7 @@ export default function ProjectDetail() {
     error,
     reload,
   } = useFetch(`/public/projects/${id}`);
+  const [activePhoto, setActivePhoto] = useState(null);
 
   if (loading) return <PageSkeleton />;
   if (error) return <ErrorState message={error} onRetry={reload} />;
@@ -72,14 +74,23 @@ export default function ProjectDetail() {
             {p.image_urls?.length > 0 && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {p.image_urls.map((url, index) => (
-                  <img
+                  <button
+                    type="button"
                     key={url}
-                    src={url}
-                    alt={`${p.title} project ${index + 1}`}
-                    loading="lazy"
-                    decoding="async"
-                    className="aspect-video w-full rounded-xl border border-slate-200 object-cover"
-                  />
+                    onClick={() => setActivePhoto({ url, title: `${p.title} – Photo ${index + 1}` })}
+                    className="group relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 hover:ring-2 hover:ring-gov-forest transition"
+                  >
+                    <img
+                      src={url}
+                      alt={`${p.title} project ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 grid place-items-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-6 w-6 text-white drop-shadow" />
+                    </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -89,28 +100,35 @@ export default function ProjectDetail() {
             <p className="text-sm leading-relaxed text-slate-700">
               {p.progress_notes || "No progress notes yet."}
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {(p.progress_photo_urls?.length
-                ? p.progress_photo_urls
-                : [p.photo_url || p.image_url].filter(Boolean)
-              ).map((url, index) => (
-                <img
-                  key={url}
-                  src={url}
-                  alt={`Project progress ${index + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-video w-full rounded-xl border border-slate-200 object-cover"
-                />
-              ))}
-              {!p.progress_photo_urls?.length &&
-                !p.photo_url &&
-                !p.image_url && (
-                  <div className="grid aspect-video place-items-center rounded-xl border border-slate-200 bg-slate-100">
-                    <ImageIcon className="h-8 w-8 text-slate-300" />
-                  </div>
-                )}
-            </div>
+            {p.progress_photo_urls?.length > 0 ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {p.progress_photo_urls.map((url, index) => (
+                  <button
+                    type="button"
+                    key={url}
+                    onClick={() => setActivePhoto({ url, title: `${p.title} – Progress Update ${index + 1}` })}
+                    className="group relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 hover:ring-2 hover:ring-gov-forest transition"
+                  >
+                    <img
+                      key={url}
+                      src={url}
+                      alt={`Project progress ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 grid place-items-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-6 w-6 text-white drop-shadow" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3 text-xs text-slate-500">
+                <ImageIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                <span>No site progress photos uploaded yet. Progress photos will appear here as updates are posted.</span>
+              </div>
+            )}
           </ChartCard>
 
           <ChartCard title="Itemized expenses">
@@ -175,6 +193,39 @@ export default function ProjectDetail() {
           </Card>
         </aside>
       </div>
+
+      {activePhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setActivePhoto(null)}
+        >
+          <div
+            className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Close image preview"
+              onClick={() => setActivePhoto(null)}
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-1.5 text-white shadow-md hover:bg-black/80 transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <img
+              src={activePhoto.url}
+              alt={activePhoto.title}
+              className="max-h-[80vh] w-auto max-w-full object-contain"
+            />
+            {activePhoto.title && (
+              <div className="bg-slate-900 px-4 py-2.5 text-xs font-medium text-slate-200">
+                {activePhoto.title}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -11,5 +11,11 @@ class ProjectMedia extends Model
 
     public function project() { return $this->belongsTo(Project::class); }
 
-    public function getUrlAttribute(): string { return url('storage/'.$this->path); }
+    public function getUrlAttribute(): string
+    {
+        if (str_starts_with($this->path, 'http://') || str_starts_with($this->path, 'https://')) {
+            return $this->path;
+        }
+        return url('storage/'.ltrim($this->path, '/'));
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
  
 use App\Http\Controllers\Controller;
 use App\Models\{Budget, Project};
+use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -54,9 +55,10 @@ class ProjectController extends Controller
  
     private function files(Request $r, array $data, Project $p): array
     {
+        $storage = app(SupabaseStorageService::class);
         foreach (['images' => ['image', 'image_path'], 'progress_photos' => ['progress_photo', 'progress_photo_path']] as $field => [$type, $legacyColumn]) {
             foreach ($r->file($field, []) as $file) {
-                $path = $file->store('projects', 'public');
+                $path = $storage->upload($file, 'projects');
                 $p->media()->create(['type' => $type, 'path' => $path]);
                 if (!$p->$legacyColumn && !isset($data[$legacyColumn])) $data[$legacyColumn] = $path;
             }
@@ -91,9 +93,10 @@ class ProjectController extends Controller
             ->filter()
             ->all();
 
+        $storage = app(SupabaseStorageService::class);
         foreach ($removedPaths as $path) {
             if (!in_array($path, $remainingPaths, true)) {
-                Storage::disk('public')->delete($path);
+                $storage->delete($path);
             }
         }
 
@@ -174,7 +177,8 @@ class ProjectController extends Controller
             ->merge([$project->image_path, $project->progress_photo_path])
             ->filter()
             ->unique();
-        foreach ($paths as $path) Storage::disk('public')->delete($path);
+        $storage = app(SupabaseStorageService::class);
+        foreach ($paths as $path) $storage->delete($path);
         $project->delete();
         return response()->noContent();
     }

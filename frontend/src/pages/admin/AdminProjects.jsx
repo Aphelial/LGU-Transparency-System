@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Pencil, Plus, ReceiptText, Search, Trash2 } from "lucide-react";
+import { ImageIcon, Pencil, Plus, ReceiptText, Search, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import api, { parseError } from "../../api";
 import {
@@ -103,9 +103,47 @@ export default function AdminProjects() {
             empty={loading ? "Loading…" : "No projects found"}
             columns={[
               {
-                label: "Title",
-                className: "font-semibold max-w-xs",
-                render: (p) => <span className="line-clamp-2">{p.title}</span>,
+                label: "Project",
+                className: "font-semibold max-w-sm",
+                render: (p) => {
+                  const img = p.image_urls?.[0] || p.image_url;
+                  return (
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/admin/projects/${p.id}`}
+                        className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 hover:opacity-90 transition block"
+                      >
+                        {img ? (
+                          <img
+                            src={img}
+                            alt={p.title}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className={`grid h-full w-full place-items-center text-slate-400 ${
+                            img ? "hidden" : ""
+                          }`}
+                        >
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                      </Link>
+                      <div className="min-w-0">
+                        <Link
+                          to={`/admin/projects/${p.id}`}
+                          className="line-clamp-2 hover:text-gov-forest hover:underline"
+                          title={p.title}
+                        >
+                          {p.title}
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                },
               },
               { label: "Category", key: "category" },
               { label: "Allocated", render: (p) => money(p.amount_allocated) },

@@ -30,6 +30,44 @@ const localDate = () => {
   }).format(new Date());
 };
 
+function FilePreviewCard({ file, onRemove, label = "New" }) {
+  const [src, setSrc] = useState("");
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  return (
+    <div className="relative group overflow-hidden rounded-lg border border-emerald-300 bg-slate-50 shadow-sm">
+      {src ? (
+        <img
+          src={src}
+          alt={file.name}
+          className="aspect-video w-full rounded-t-lg object-cover"
+        />
+      ) : (
+        <div className="aspect-video grid place-items-center bg-slate-100 text-xs text-slate-400">Loading…</div>
+      )}
+      <span className="absolute left-1.5 top-1.5 rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+        {label}
+      </span>
+      <button
+        type="button"
+        aria-label={`Remove ${file.name}`}
+        title="Remove"
+        onClick={onRemove}
+        className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-slate-700 shadow hover:bg-red-50 hover:text-red-600 transition"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+      <div className="p-1.5 text-[11px] font-medium text-slate-600 truncate" title={file.name}>
+        {file.name}
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -386,44 +424,39 @@ export default function ProjectForm() {
               className="inp"
               onChange={setFilesFor("images")}
             />
-            {visibleMedia("images").length > 0 && (
+            {(visibleMedia("images").length > 0 || files.images.length > 0) && (
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {visibleMedia("images").map((item) => (
-                  <div key={item.id || item.path} className="relative">
+                  <div key={item.id || item.path} className="relative group overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm">
                     <img
                       src={item.url}
                       alt="Saved project"
-                      className="aspect-video w-full rounded-lg border border-slate-200 object-cover"
+                      className="aspect-video w-full rounded-lg object-cover"
                     />
+                    <span className="absolute left-1.5 top-1.5 rounded bg-slate-700/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow">
+                      Saved
+                    </span>
                     <button
                       type="button"
                       aria-label="Remove saved project image"
                       title="Remove image when saved"
                       onClick={() => removeSavedMedia("images", item)}
-                      className="absolute right-1 top-1 rounded-full bg-white p-1 text-slate-700 shadow hover:bg-slate-100"
+                      className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-slate-700 shadow hover:bg-red-50 hover:text-red-600 transition"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
+                {files.images.map((file, index) => (
+                  <FilePreviewCard
+                    key={`${file.name}-${file.lastModified}-${index}`}
+                    file={file}
+                    onRemove={() => removeSelectedFile("images", index)}
+                    label="New"
+                  />
+                ))}
               </div>
             )}
-            {files.images.map((file, index) => (
-              <div
-                key={`${file.name}-${file.lastModified}`}
-                className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500"
-              >
-                <span className="truncate">{file.name}</span>
-                <button
-                  type="button"
-                  aria-label={`Remove ${file.name}`}
-                  onClick={() => removeSelectedFile("images", index)}
-                  className="text-slate-700 hover:text-gov-forest"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
           </Field>
           <Field
             className="md:col-span-3"
@@ -437,44 +470,39 @@ export default function ProjectForm() {
               className="inp"
               onChange={setFilesFor("progress_photos")}
             />
-            {visibleMedia("progress_photos").length > 0 && (
+            {(visibleMedia("progress_photos").length > 0 || files.progress_photos.length > 0) && (
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {visibleMedia("progress_photos").map((item) => (
-                  <div key={item.id || item.path} className="relative">
+                  <div key={item.id || item.path} className="relative group overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm">
                     <img
                       src={item.url}
                       alt="Saved progress"
-                      className="aspect-video w-full rounded-lg border border-slate-200 object-cover"
+                      className="aspect-video w-full rounded-lg object-cover"
                     />
+                    <span className="absolute left-1.5 top-1.5 rounded bg-slate-700/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow">
+                      Saved
+                    </span>
                     <button
                       type="button"
                       aria-label="Remove saved progress photo"
                       title="Remove photo when saved"
                       onClick={() => removeSavedMedia("progress_photos", item)}
-                      className="absolute right-1 top-1 rounded-full bg-white p-1 text-slate-700 shadow hover:bg-slate-100"
+                      className="absolute right-1 top-1 rounded-full bg-white/90 p-1 text-slate-700 shadow hover:bg-red-50 hover:text-red-600 transition"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
+                {files.progress_photos.map((file, index) => (
+                  <FilePreviewCard
+                    key={`${file.name}-${file.lastModified}-${index}`}
+                    file={file}
+                    onRemove={() => removeSelectedFile("progress_photos", index)}
+                    label="New"
+                  />
+                ))}
               </div>
             )}
-            {files.progress_photos.map((file, index) => (
-              <div
-                key={`${file.name}-${file.lastModified}`}
-                className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500"
-              >
-                <span className="truncate">{file.name}</span>
-                <button
-                  type="button"
-                  aria-label={`Remove ${file.name}`}
-                  onClick={() => removeSelectedFile("progress_photos", index)}
-                  className="text-slate-700 hover:text-gov-forest"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
           </Field>
           <div className="flex gap-2 md:col-span-6">
             <button className="btn-primary" disabled={busy}>

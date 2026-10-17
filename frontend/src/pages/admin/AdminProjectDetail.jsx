@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, X, ZoomIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api, { parseError } from '../../api';
 import { BackLink, Card, ChartCard, ConfirmDialog, DataTable, ErrorState, PageHeader, PageSkeleton, StatusBadge, UtilBar } from '../../components/ui';
@@ -18,6 +18,7 @@ export default function AdminProjectDetail() {
   const navigate = useNavigate();
   const { data: project, loading, error, reload } = useFetch(`/admin/projects/${id}`);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [activePhoto, setActivePhoto] = useState(null);
   const [busy, setBusy] = useState(false);
 
   const removeProject = async () => {
@@ -66,7 +67,19 @@ export default function AdminProjectDetail() {
             <p className="leading-relaxed text-slate-700">{project.description || 'No description provided.'}</p>
             {projectImages.length > 0 && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {projectImages.map((url, index) => <img key={url} src={url} alt={`${project.title} project ${index + 1}`} className="aspect-video w-full rounded-xl border border-slate-200 object-cover" />)}
+                {projectImages.map((url, index) => (
+                  <button
+                    type="button"
+                    key={url}
+                    onClick={() => setActivePhoto({ url, title: `${project.title} – Photo ${index + 1}` })}
+                    className="group relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 hover:ring-2 hover:ring-gov-forest transition"
+                  >
+                    <img src={url} alt={`${project.title} project ${index + 1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 grid place-items-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-6 w-6 text-white drop-shadow" />
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </ChartCard>
@@ -75,7 +88,19 @@ export default function AdminProjectDetail() {
             <p className="leading-relaxed text-slate-700">{project.progress_notes || 'No progress notes yet.'}</p>
             {progressPhotos.length > 0 && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {progressPhotos.map((url, index) => <img key={url} src={url} alt={`${project.title} progress ${index + 1}`} className="aspect-video w-full rounded-xl border border-slate-200 object-cover" />)}
+                {progressPhotos.map((url, index) => (
+                  <button
+                    type="button"
+                    key={url}
+                    onClick={() => setActivePhoto({ url, title: `${project.title} – Progress Update ${index + 1}` })}
+                    className="group relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 hover:ring-2 hover:ring-gov-forest transition"
+                  >
+                    <img src={url} alt={`${project.title} progress ${index + 1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 grid place-items-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-6 w-6 text-white drop-shadow" />
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </ChartCard>
@@ -119,6 +144,39 @@ export default function AdminProjectDetail() {
         onConfirm={removeProject}
         busy={busy}
       />
+
+      {activePhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setActivePhoto(null)}
+        >
+          <div
+            className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Close image preview"
+              onClick={() => setActivePhoto(null)}
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-1.5 text-white shadow-md hover:bg-black/80 transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <img
+              src={activePhoto.url}
+              alt={activePhoto.title}
+              className="max-h-[80vh] w-auto max-w-full object-contain"
+            />
+            {activePhoto.title && (
+              <div className="bg-slate-900 px-4 py-2.5 text-xs font-medium text-slate-200">
+                {activePhoto.title}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

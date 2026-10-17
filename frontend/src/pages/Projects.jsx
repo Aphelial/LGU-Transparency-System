@@ -124,45 +124,53 @@ export default function Projects() {
         <>
           {view === "cards" ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {data.data.map((p) => (
-                <Card key={p.id} className="flex flex-col overflow-hidden">
-                  <div className="relative grid h-44 place-items-center overflow-hidden bg-slate-100">
-                    {p.image_urls?.[0] || p.image_url ? (
-                      <img
-                        src={p.image_urls?.[0] || p.image_url}
-                        alt={p.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <ImageIcon className="h-8 w-8 text-slate-300" />
-                    )}
-                    <span className="absolute left-3 top-3">
-                      <StatusBadge status={p.status} />
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col p-4">
-                    <h2 className="font-bold leading-snug text-gov-navy">
-                      {p.title}
-                    </h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">
-                      {p.description}
-                    </p>
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Budget
-                      </span>
-                      <span className="text-sm font-bold text-gov-forest">
-                        {money(p.amount_allocated)}
+              {data.data.map((p) => {
+                const img = p.image_urls?.[0] || p.image_url;
+                return (
+                  <Card key={p.id} className="group flex flex-col overflow-hidden transition hover:shadow-card-hover">
+                    <div className="relative grid h-44 place-items-center overflow-hidden bg-slate-100">
+                      {img ? (
+                        <img
+                          src={img}
+                          alt={p.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                          }}
+                        />
+                      ) : null}
+                      <div className={`grid h-full w-full place-items-center text-slate-400 ${img ? "hidden" : ""}`}>
+                        <ImageIcon className="h-9 w-9 text-slate-300" />
+                      </div>
+                      <span className="absolute left-3 top-3">
+                        <StatusBadge status={p.status} />
                       </span>
                     </div>
-                    <Link to={`/projects/${p.id}`} className="btn-outline mt-4">
-                      View details
-                    </Link>
-                  </div>
-                </Card>
-              ))}
+                    <div className="flex flex-1 flex-col p-4">
+                      <h2 className="font-bold leading-snug text-gov-navy group-hover:text-gov-forest transition-colors">
+                        {p.title}
+                      </h2>
+                      <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                        {p.description}
+                      </p>
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Budget
+                        </span>
+                        <span className="text-sm font-bold text-gov-forest">
+                          {money(p.amount_allocated)}
+                        </span>
+                      </div>
+                      <Link to={`/projects/${p.id}`} className="btn-outline mt-4">
+                        View details
+                      </Link>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           ) : (
             <DataTable
@@ -170,14 +178,40 @@ export default function Projects() {
               columns={[
                 {
                   label: "Project",
-                  render: (p) => (
-                    <Link
-                      className="font-semibold text-green-800 hover:underline"
-                      to={`/projects/${p.id}`}
-                    >
-                      {p.title}
-                    </Link>
-                  ),
+                  className: "font-semibold max-w-sm",
+                  render: (p) => {
+                    const img = p.image_urls?.[0] || p.image_url;
+                    return (
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to={`/projects/${p.id}`}
+                          className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 block hover:opacity-90 transition"
+                        >
+                          {img ? (
+                            <img
+                              src={img}
+                              alt={p.title}
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                              }}
+                            />
+                          ) : null}
+                          <div className={`grid h-full w-full place-items-center text-slate-400 ${img ? "hidden" : ""}`}>
+                            <ImageIcon className="h-5 w-5" />
+                          </div>
+                        </Link>
+                        <Link
+                          className="font-semibold text-gov-navy hover:text-gov-forest hover:underline line-clamp-2"
+                          to={`/projects/${p.id}`}
+                        >
+                          {p.title}
+                        </Link>
+                      </div>
+                    );
+                  },
                 },
                 { label: "Category", key: "category" },
                 { label: "Year", render: (p) => p.start_date?.slice(0, 4) },

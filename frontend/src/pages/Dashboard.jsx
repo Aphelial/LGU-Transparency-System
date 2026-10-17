@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Banknote,
-  Landmark,
   FolderKanban,
+  ImageIcon,
+  Landmark,
   PiggyBank,
   Receipt,
 } from "lucide-react";
@@ -246,24 +247,46 @@ export default function Dashboard() {
                 }
               >
                 <ul className="divide-y divide-slate-100">
-                  {data.recent_projects.map((p) => (
-                    <li key={p.id}>
-                      <Link
-                        to={`/projects/${p.id}`}
-                        className="flex items-start justify-between gap-3 py-3.5 transition hover:text-malachite-700"
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate font-semibold">
-                            {p.title}
-                          </span>
-                          <span className="text-xs text-slate-500">
-                            {money(p.amount_allocated)}
-                          </span>
-                        </span>
-                        <StatusBadge status={p.status} />
-                      </Link>
-                    </li>
-                  ))}
+                  {data.recent_projects.map((p) => {
+                    const img = p.image_urls?.[0] || p.image_url;
+                    return (
+                      <li key={p.id}>
+                        <Link
+                          to={`/projects/${p.id}`}
+                          className="group flex items-center justify-between gap-3 py-3 transition hover:text-malachite-700"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                              {img ? (
+                                <img
+                                  src={img}
+                                  alt={p.title}
+                                  loading="lazy"
+                                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`grid h-full w-full place-items-center text-slate-400 ${img ? "hidden" : ""}`}>
+                                <ImageIcon className="h-4 w-4" />
+                              </div>
+                            </div>
+                            <div className="min-w-0">
+                              <span className="block truncate font-semibold group-hover:text-gov-forest transition-colors">
+                                {p.title}
+                              </span>
+                              <span className="text-xs text-slate-500">
+                                {money(p.amount_allocated)}
+                              </span>
+                            </div>
+                          </div>
+                          <StatusBadge status={p.status} />
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </ChartCard>
             </div>

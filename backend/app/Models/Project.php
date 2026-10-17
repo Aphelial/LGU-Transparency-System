@@ -30,7 +30,7 @@ class Project extends Model
     }
 
     public function getImageUrlAttribute() { return $this->image_urls[0] ?? null; }
-    public function getPhotoUrlAttribute() { return $this->progress_photo_urls[0] ?? $this->image_url; }
+    public function getPhotoUrlAttribute() { return $this->progress_photo_urls[0] ?? null; }
 
     private function mediaUrls(string $type, ?string $legacyPath): array
     {
@@ -42,6 +42,11 @@ class Project extends Model
             ->unique()
             ->values();
 
-        return $paths->map(fn ($path) => url('storage/'.$path))->all();
+        return $paths->map(function ($path) {
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+            return url('storage/'.ltrim($path, '/'));
+        })->all();
     }
 }
