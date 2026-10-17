@@ -8,6 +8,8 @@ services:
     plan: free
     healthCheckPath: /up
     envVars:
+      - key: PHP_CLI_SERVER_WORKERS
+        value: "4"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -15,7 +17,7 @@ services:
       - key: APP_KEY
         sync: false
       - key: APP_URL
-        value: https://lgu-transparency-api.onrender.com
+        value: https://lgu-transparency-api-78x0.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL
